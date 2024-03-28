@@ -9,6 +9,16 @@ public class PlayerScript : MonoBehaviour
 
     [Header("Player Animator & Gravity")]
     public CharacterController cC;
+
+    [Header("Player Script Camera")]
+    public Transform playerCamera;
+
+    [Header("Player Jumping & Velocity")]
+    public float turnCalmTime = 0.1f;
+    float turnCalmVelocity;
+
+
+
     private void Update()
     {
         playerMove();
@@ -23,7 +33,16 @@ public class PlayerScript : MonoBehaviour
 
         if (direction.magnitude >= 0.1f)
         {
-            cC.Move(direction.normalized * playerSpeed * Time.deltaTime);
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + playerCamera.eulerAngles.y;
+
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle,
+             ref turnCalmVelocity, turnCalmTime);
+
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
+
+            Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+
+            cC.Move(moveDirection.normalized * playerSpeed * Time.deltaTime);
         }
     }
 }
